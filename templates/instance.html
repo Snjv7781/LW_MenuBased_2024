@@ -5,165 +5,239 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AWS EC2 Management</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+        * {
             margin: 0;
             padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+            box-sizing: border-box;
         }
-        .container {
-            background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f7f7f7;
             padding: 20px;
-            max-width: 600px;
-            width: 100%;
         }
-        h1 {
-            color: #333;
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        }
+
+        h1, h2 {
             text-align: center;
-            margin-bottom: 20px;
-            animation: fadeIn 1s ease-out;
+            color: #333;
         }
-        form {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
+
+        .section {
+            margin-bottom: 30px;
         }
-        input[type="text"], input[type="button"] {
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 16px;
-        }
-        input[type="button"] {
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        input[type="button"]:hover {
-            background-color: #0056b3;
-        }
-        .response {
-            margin-top: 20px;
-            padding: 10px;
-            border-radius: 5px;
-            color: #fff;
+
+        label {
+            display: block;
+            margin-bottom: 5px;
             font-weight: bold;
         }
-        .success {
-            background-color: #28a745;
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
         }
-        .error {
-            background-color: #dc3545;
+
+        button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
         }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+
+        button:hover {
+            background-color: #0056b3;
         }
-        .form-group {
-            display: flex;
-            flex-direction: column;
+
+        #instancesTable {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        #instancesTable th, #instancesTable td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        #instancesTable th {
+            background-color: #007bff;
+            color: white;
+        }
+
+        #instancesTable td {
+            background-color: #f9f9f9;
+        }
+
+        #launchMessage, #stopMessage, #terminateMessage {
+            color: green;
+            margin-top: 10px;
+            font-size: 14px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>AWS EC2 Management</h1>
-        <form id="launchForm">
+        <h1>AWS EC2 Instance Management</h1>
+
+        <!-- Section to launch a new instance -->
+        <div class="section">
             <h2>Launch Instance</h2>
-            <div class="form-group">
-                <label for="launchInstanceType">Instance Type:</label>
-                <input type="text" id="launchInstanceType" placeholder="e.g., t2.micro">
-            </div>
-            <div class="form-group">
-                <label for="launchAmiId">AMI ID:</label>
-                <input type="text" id="launchAmiId" placeholder="e.g., ami-0ec0e125bb6c6e8ec">
-            </div>
-            <input type="button" value="Launch Instance" onclick="launchInstance()">
-        </form>
+            <label for="amiId">AMI ID (optional):</label>
+            <input type="text" id="amiId" placeholder="Enter AMI ID (optional)">
+            <button onclick="launchInstance()">Launch t2.micro Instance</button>
+            <div id="launchMessage"></div>
+        </div>
 
-        <form id="stopForm">
+        <!-- Section to stop an instance -->
+        <div class="section">
             <h2>Stop Instance</h2>
-            <div class="form-group">
-                <label for="stopInstanceId">Instance ID:</label>
-                <input type="text" id="stopInstanceId" placeholder="e.g., i-0abcdef1234567890">
-            </div>
-            <input type="button" value="Stop Instance" onclick="stopInstance()">
-        </form>
+            <label for="stopInstanceId">Instance ID:</label>
+            <input type="text" id="stopInstanceId" placeholder="Enter Instance ID">
+            <button onclick="stopInstance()">Stop Instance</button>
+            <div id="stopMessage"></div>
+        </div>
 
-        <form id="terminateForm">
+        <!-- Section to terminate an instance -->
+        <div class="section">
             <h2>Terminate Instance</h2>
-            <div class="form-group">
-                <label for="terminateInstanceId">Instance ID:</label>
-                <input type="text" id="terminateInstanceId" placeholder="e.g., i-0abcdef1234567890">
-            </div>
-            <input type="button" value="Terminate Instance" onclick="terminateInstance()">
-        </form>
+            <label for="terminateInstanceId">Instance ID:</label>
+            <input type="text" id="terminateInstanceId" placeholder="Enter Instance ID">
+            <button onclick="terminateInstance()">Terminate Instance</button>
+            <div id="terminateMessage"></div>
+        </div>
 
-        <form id="listForm">
+        <!-- Section to list all instances -->
+        <div class="section">
             <h2>List Instances</h2>
-            <input type="button" value="List Instances" onclick="listInstances()">
-        </form>
-
-        <div id="response" class="response"></div>
+            <button onclick="listInstances()">List All Instances</button>
+            <table id="instancesTable">
+                <thead>
+                    <tr>
+                        <th>Instance ID</th>
+                        <th>Instance Type</th>
+                        <th>State</th>
+                        <th>Launch Time</th>
+                    </tr>
+                </thead>
+                <tbody id="instancesList"></tbody>
+            </table>
+        </div>
     </div>
 
     <script>
-        async function fetchData(url, method, data = {}) {
-            const response = await fetch(url, {
-                method: method,
+        const apiUrl = "http://127.0.0.1:5000"; // Adjust API URL if needed
+
+        // Launch a new instance
+        function launchInstance() {
+            const amiId = document.getElementById("amiId").value;
+
+            fetch(`${apiUrl}/launch-instance`, {
+                method: "POST",
                 headers: {
-                    'Content-Type': 'application/json'
+                    "Content-Type": "application/json"
                 },
-                body: JSON.stringify(data)
+                body: JSON.stringify({
+                    instance_type: "t2.micro",
+                    ami_id: amiId || undefined  // Use ami_id only if provided
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.instance_ids) {
+                    document.getElementById("launchMessage").innerText = `Instance launched: ${data.instance_ids}`;
+                } else {
+                    document.getElementById("launchMessage").innerText = `Error: ${data.error}`;
+                }
+            })
+            .catch(error => {
+                document.getElementById("launchMessage").innerText = `Error: ${error}`;
             });
-            return response.json();
         }
 
-        function displayResponse(response, isSuccess) {
-            const responseDiv = document.getElementById('response');
-            responseDiv.textContent = response.message || response.error;
-            responseDiv.className = isSuccess ? 'response success' : 'response error';
+        // Stop an instance
+        function stopInstance() {
+            const instanceId = document.getElementById("stopInstanceId").value;
+
+            fetch(`${apiUrl}/stop-instance`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    instance_id: instanceId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("stopMessage").innerText = data.message || `Error: ${data.error}`;
+            })
+            .catch(error => {
+                document.getElementById("stopMessage").innerText = `Error: ${error}`;
+            });
         }
 
-        async function launchInstance() {
-            const instanceType = document.getElementById('launchInstanceType').value;
-            const amiId = document.getElementById('launchAmiId').value;
-            const response = await fetchData('/launch-instance', 'POST', { instance_type: instanceType, ami_id: amiId });
-            displayResponse(response, response.message !== undefined);
+        // Terminate an instance
+        function terminateInstance() {
+            const instanceId = document.getElementById("terminateInstanceId").value;
+
+            fetch(`${apiUrl}/terminate-instance`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    instance_id: instanceId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("terminateMessage").innerText = data.message || `Error: ${data.error}`;
+            })
+            .catch(error => {
+                document.getElementById("terminateMessage").innerText = `Error: ${error}`;
+            });
         }
 
-        async function stopInstance() {
-            const instanceId = document.getElementById('stopInstanceId').value;
-            const response = await fetchData('/stop-instance', 'POST', { instance_id: instanceId });
-            displayResponse(response, response.message !== undefined);
-        }
+        // List all instances
+        function listInstances() {
+            fetch(`${apiUrl}/list-instances`, {
+                method: "GET"
+            })
+            .then(response => response.json())
+            .then(data => {
+                const instancesList = document.getElementById("instancesList");
+                instancesList.innerHTML = ""; // Clear existing list
 
-        async function terminateInstance() {
-            const instanceId = document.getElementById('terminateInstanceId').value;
-            const response = await fetchData('/terminate-instance', 'POST', { instance_id: instanceId });
-            displayResponse(response, response.message !== undefined);
-        }
-
-        async function listInstances() {
-            const response = await fetchData('/list-instances', 'GET');
-            if (response.instances) {
-                let instanceList = '<h3>Instance List:</h3><ul>';
-                response.instances.forEach(instance => {
-                    instanceList += `<li>ID: ${instance.instance_id}, Type: ${instance.instance_type}, State: ${instance.state}, Launched: ${instance.launch_time}</li>`;
+                data.instances.forEach(instance => {
+                    const row = `<tr>
+                        <td>${instance.instance_id}</td>
+                        <td>${instance.instance_type}</td>
+                        <td>${instance.state}</td>
+                        <td>${instance.launch_time}</td>
+                    </tr>`;
+                    instancesList.innerHTML += row;
                 });
-                instanceList += '</ul>';
-                displayResponse({ message: instanceList }, true);
-            } else {
-                displayResponse(response, false);
-            }
+            })
+            .catch(error => {
+                console.log("Error listing instances:", error);
+            });
         }
     </script>
 </body>

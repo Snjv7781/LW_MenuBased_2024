@@ -27,24 +27,21 @@ app = Flask(__name__)
 # Enable Cross-Origin Resource Sharing (CORS)
 CORS(app)
 
-
-
 aws_access_key_id = os.getenv('AWS_ACCESS_KEY_ID')
 aws_secret_access_key = os.getenv('AWS_SECRET_ACCESS_KEY')
 region_name = 'ap-south-1'
 
+# Check if credentials are available
 if not aws_access_key_id or not aws_secret_access_key:
-    raise EnvironmentError("AWS credentials not found. Please set them as environment variables.")
+    raise EnvironmentError("AWS credentials not found. Please set them in the environment variables.")
 
-session = boto3.Session(
+# Initialize Boto3 EC2 resource
+ec2 = boto3.resource(
+    'ec2',
+    region_name=region_name,
     aws_access_key_id=aws_access_key_id,
-    aws_secret_access_key=aws_secret_access_key,
-    region_name=region_name
+    aws_secret_access_key=aws_secret_access_key
 )
-
-ec2 = session.resource('ec2')
-
-
 
 # Load the account SID and Auth Token from environment variables
 account_sid = os.getenv('TWILIO_ACCOUNT_SID')
@@ -208,15 +205,12 @@ def send_email_endpoint():
     
 
 
-# Initialize the EC2 resource
-ec2 = boto3.resource('ec2', region_name='ap-south-1')  # Replace with your region
-
 @app.route("/launch-instance", methods=["POST"])
 def launch_instance():
     try:
         data = request.json
         instance_type = data.get('instance_type', 't2.micro')
-        ami_id = data.get('ami_id', 'ami-0e53db6fd757e38c7')
+        ami_id = data.get('ami_id', 'ami-0e53db6fd757e38c7')  # Default AMI ID
 
         instances = ec2.create_instances(
             InstanceType=instance_type,
@@ -226,12 +220,12 @@ def launch_instance():
         )
 
         instance_ids = [instance.id for instance in instances]
-        return jsonify({"message": "Instance launched", "instance_ids": instance_ids})
-    
+        return jsonify({"message": "Instance launched", "instance_ids": instance_ids}), 201
+
     except (NoCredentialsError, PartialCredentialsError) as e:
-        return jsonify({"error": f'Credentials error: {str(e)}'}), 500
+        return jsonify({"error": f"Credentials error: {str(e)}"}), 500
     except ClientError as e:
-        return jsonify({"error": f'Client error: {str(e)}'}), 500
+        return jsonify({"error": f"Client error: {str(e)}"}), 500
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -241,15 +235,18 @@ def stop_instance():
         data = request.json
         instance_id = data.get('instance_id')
 
+        if not instance_id:
+            return jsonify({"error": "Instance ID is required"}), 400
+
         instance = ec2.Instance(instance_id)
         instance.stop()
 
         return jsonify({"message": f"Instance {instance_id} stopped"})
-    
+
     except (NoCredentialsError, PartialCredentialsError) as e:
-        return jsonify({"error": f'Credentials error: {str(e)}'}), 500
+        return jsonify({"error": f"Credentials error: {str(e)}"}), 500
     except ClientError as e:
-        return jsonify({"error": f'Client error: {str(e)}'}), 500
+        return jsonify({"error": f"Client error: {str(e)}"}), 500
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -259,19 +256,22 @@ def terminate_instance():
         data = request.json
         instance_id = data.get('instance_id')
 
+        if not instance_id:
+            return jsonify({"error": "Instance ID is required"}), 400
+
         instance = ec2.Instance(instance_id)
         instance.terminate()
 
         return jsonify({"message": f"Instance {instance_id} terminated"})
-    
+
     except (NoCredentialsError, PartialCredentialsError) as e:
-        return jsonify({"error": f'Credentials error: {str(e)}'}), 500
+        return jsonify({"error": f"Credentials error: {str(e)}"}), 500
     except ClientError as e:
-        return jsonify({"error": f'Client error: {str(e)}'}), 500
+        return jsonify({"error": f"Client error: {str(e)}"}), 500
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@app.route("/list-instances")
+@app.route("/list-instances", methods=["GET"])
 def list_instances():
     try:
         instances = ec2.instances.all()
@@ -286,14 +286,13 @@ def list_instances():
             })
 
         return jsonify({"instances": instance_list})
-    
+
     except (NoCredentialsError, PartialCredentialsError) as e:
-        return jsonify({"error": f'Credentials error: {str(e)}'}), 500
+        return jsonify({"error": f"Credentials error: {str(e)}"}), 500
     except ClientError as e:
-        return jsonify({"error": f'Client error: {str(e)}'}), 500
+        return jsonify({"error": f"Client error: {str(e)}"}), 500
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
