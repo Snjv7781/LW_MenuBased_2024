@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Make a Call</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: #fff;
+        }
+
+        .container {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            width: 300px;
+            transition: transform 0.3s ease;
+        }
+
+        .container:hover {
+            transform: scale(1.05);
+        }
+
+        h2 {
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            padding: 10px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 5px;
+            width: 100%;
+            font-size: 16px;
+        }
+
+        button {
+            background-color: #00c6ff;
+            border: none;
+            padding: 10px 20px;
+            color: #fff;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #005bea;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(0, 198, 255, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(0, 198, 255, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(0, 198, 255, 0);
+            }
+        }
+
+        button:focus {
+            outline: none;
+            animation: pulse 1s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Make a Call</h2>
+        <input type="text" id="phoneNumber" placeholder="Enter phone number" />
+        <button onclick="makeCall()">Call Now</button>
+        <p id="statusMessage"></p>
+    </div>
+
+    <script>
+        function makeCall() {
+            const phoneNumber = document.getElementById('phoneNumber').value;
+            const statusMessage = document.getElementById('statusMessage');
+
+            if (!phoneNumber) {
+                statusMessage.textContent = "Please enter a phone number.";
+                return;
+            }
+
+            fetch('http://127.0.0.1:5000/make_call', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ to: phoneNumber })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "Call initiated successfully!") {
+                    statusMessage.textContent = "Call is being placed!";
+                } else {
+                    statusMessage.textContent = "Error: " + data.error;
+                }
+            })
+            .catch(error => {
+                statusMessage.textContent = "Failed to make the call. Please try again.";
+                console.error('Error:', error);
+            });
+        }
+    </script>
+</body>
+</html>

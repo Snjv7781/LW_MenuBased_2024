@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp Messaging</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+        }
+
+        .card-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .card {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            width: 250px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .card h2 {
+            margin: 0 0 10px;
+            color: #333;
+        }
+
+        .card p {
+            color: #555;
+        }
+
+        .form-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .form-container.active {
+            display: flex;
+        }
+
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        textarea {
+            resize: vertical;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #28a745;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+
+        .response {
+            margin-top: 20px;
+            font-weight: bold;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="card-container">
+        <div class="card" onclick="toggleForm()">
+            <h2>Send WhatsApp</h2>
+            <p>Send a WhatsApp message to your contacts.</p>
+        </div>
+    </div>
+
+    <div class="form-container" id="formContainer">
+        <h3>Send WhatsApp Message</h3>
+        <form id="whatsappForm">
+            <input type="text" id="phone" name="phone" placeholder="+1234567890" required>
+            <textarea id="message" name="message" rows="4" placeholder="Your message here..." required></textarea>
+            <button type="submit">Send Message</button>
+        </form>
+        <div class="response" id="response"></div>
+    </div>
+
+    <script>
+        function toggleForm() {
+            const formContainer = document.getElementById('formContainer');
+            formContainer.classList.toggle('active');
+        }
+
+        document.getElementById('whatsappForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const phone = document.getElementById('phone').value;
+            const message = document.getElementById('message').value;
+            const responseElement = document.getElementById('response');
+
+            fetch('http://localhost:5000/send_whatsapp', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ to: phone, message: message }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    responseElement.innerHTML = 'Message sent successfully!';
+                    responseElement.style.color = 'green';
+                } else {
+                    responseElement.innerHTML = `Error: ${data.message}`;
+                    responseElement.style.color = 'red';
+                }
+            })
+            .catch(error => {
+                responseElement.innerHTML = `Error: ${error}`;
+                responseElement.style.color = 'red';
+            });
+        });
+    </script>
+</body>
+</html>

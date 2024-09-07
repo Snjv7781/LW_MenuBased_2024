@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWS EC2 Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            max-width: 600px;
+            width: 100%;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+            animation: fadeIn 1s ease-out;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        input[type="text"], input[type="button"] {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        input[type="button"] {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        input[type="button"]:hover {
+            background-color: #0056b3;
+        }
+        .response {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 5px;
+            color: #fff;
+            font-weight: bold;
+        }
+        .success {
+            background-color: #28a745;
+        }
+        .error {
+            background-color: #dc3545;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AWS EC2 Management</h1>
+        <form id="launchForm">
+            <h2>Launch Instance</h2>
+            <div class="form-group">
+                <label for="launchInstanceType">Instance Type:</label>
+                <input type="text" id="launchInstanceType" placeholder="e.g., t2.micro">
+            </div>
+            <div class="form-group">
+                <label for="launchAmiId">AMI ID:</label>
+                <input type="text" id="launchAmiId" placeholder="e.g., ami-0ec0e125bb6c6e8ec">
+            </div>
+            <input type="button" value="Launch Instance" onclick="launchInstance()">
+        </form>
+
+        <form id="stopForm">
+            <h2>Stop Instance</h2>
+            <div class="form-group">
+                <label for="stopInstanceId">Instance ID:</label>
+                <input type="text" id="stopInstanceId" placeholder="e.g., i-0abcdef1234567890">
+            </div>
+            <input type="button" value="Stop Instance" onclick="stopInstance()">
+        </form>
+
+        <form id="terminateForm">
+            <h2>Terminate Instance</h2>
+            <div class="form-group">
+                <label for="terminateInstanceId">Instance ID:</label>
+                <input type="text" id="terminateInstanceId" placeholder="e.g., i-0abcdef1234567890">
+            </div>
+            <input type="button" value="Terminate Instance" onclick="terminateInstance()">
+        </form>
+
+        <form id="listForm">
+            <h2>List Instances</h2>
+            <input type="button" value="List Instances" onclick="listInstances()">
+        </form>
+
+        <div id="response" class="response"></div>
+    </div>
+
+    <script>
+        async function fetchData(url, method, data = {}) {
+            const response = await fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+            return response.json();
+        }
+
+        function displayResponse(response, isSuccess) {
+            const responseDiv = document.getElementById('response');
+            responseDiv.textContent = response.message || response.error;
+            responseDiv.className = isSuccess ? 'response success' : 'response error';
+        }
+
+        async function launchInstance() {
+            const instanceType = document.getElementById('launchInstanceType').value;
+            const amiId = document.getElementById('launchAmiId').value;
+            const response = await fetchData('/launch-instance', 'POST', { instance_type: instanceType, ami_id: amiId });
+            displayResponse(response, response.message !== undefined);
+        }
+
+        async function stopInstance() {
+            const instanceId = document.getElementById('stopInstanceId').value;
+            const response = await fetchData('/stop-instance', 'POST', { instance_id: instanceId });
+            displayResponse(response, response.message !== undefined);
+        }
+
+        async function terminateInstance() {
+            const instanceId = document.getElementById('terminateInstanceId').value;
+            const response = await fetchData('/terminate-instance', 'POST', { instance_id: instanceId });
+            displayResponse(response, response.message !== undefined);
+        }
+
+        async function listInstances() {
+            const response = await fetchData('/list-instances', 'GET');
+            if (response.instances) {
+                let instanceList = '<h3>Instance List:</h3><ul>';
+                response.instances.forEach(instance => {
+                    instanceList += `<li>ID: ${instance.instance_id}, Type: ${instance.instance_type}, State: ${instance.state}, Launched: ${instance.launch_time}</li>`;
+                });
+                instanceList += '</ul>';
+                displayResponse({ message: instanceList }, true);
+            } else {
+                displayResponse(response, false);
+            }
+        }
+    </script>
+</body>
+</html>

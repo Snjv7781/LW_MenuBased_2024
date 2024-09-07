@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Send Email with Attachment</title>
+    <style>
+        /* The same CSS styling as before */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            font-family: 'Arial', sans-serif;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .form-container {
+            background: #fff;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 100%;
+            animation: fadeIn 1.5s ease-in-out;
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        label {
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 5px;
+            display: block;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border 0.3s;
+        }
+        input:focus, textarea:focus {
+            border: 1px solid #6e8efb;
+        }
+        button {
+            background: #6e8efb;
+            color: #fff;
+            padding: 12px;
+            width: 100%;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #a777e3;
+        }
+        .success-message, .error-message {
+            text-align: center;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 15px;
+            font-size: 16px;
+        }
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+        }
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="form-container">
+    <h2>Send Email with Attachment</h2>
+    <form id="emailForm" enctype="multipart/form-data">
+        <label for="senderEmail">Sender Email</label>
+        <input type="email" id="senderEmail" name="sender_email" placeholder="Enter your email" required>
+
+        <label for="receiverEmail">Receiver Email</label>
+        <input type="email" id="receiverEmail" name="receiver_email" placeholder="Enter recipient email" required>
+
+        <label for="subject">Subject</label>
+        <input type="text" id="subject" name="subject" placeholder="Enter subject" required>
+
+        <label for="body">Message</label>
+        <textarea id="body" name="body" placeholder="Enter your message" rows="5" required></textarea>
+
+        <label for="attachment">Attachment</label>
+        <input type="file" id="attachment" name="attachment">
+
+        <button type="submit">Send Email</button>
+
+        <div id="message" class="success-message" style="display: none;">Email sent successfully!</div>
+        <div id="error" class="error-message" style="display: none;">Failed to send email!</div>
+    </form>
+</div>
+
+<script>
+    document.getElementById("emailForm").addEventListener("submit", function(event) {
+        event.preventDefault();
+
+        const formData = new FormData(this);
+
+        fetch('http://127.0.0.1:5000/send-email', {
+            method: 'POST',
+            body: formData,
+        })
+        .then(response => {
+            if (response.ok) {
+                document.getElementById("message").style.display = "block";
+                document.getElementById("error").style.display = "none";
+                document.getElementById("emailForm").reset();
+            } else {
+                document.getElementById("error").style.display = "block";
+                document.getElementById("message").style.display = "none";
+            }
+        })
+        .catch((error) => {
+            document.getElementById("error").style.display = "block";
+            document.getElementById("message").style.display = "none";
+            console.error('Error:', error);
+        });
+    });
+</script>
+
+</body>
+</html>

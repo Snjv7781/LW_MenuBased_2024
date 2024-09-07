@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Portfolio</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='static\css\styles.css') }}">
+
+    <style>
+        body {
+            background-color: #147d90;
+            color: #FFF;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            display: flex;
+            align-items: center;
+            width: 90%;
+            max-width: 1200px;
+        }
+
+        .details {
+            flex: 1;
+            padding: 20px;
+            text-align: left;
+        }
+
+        .details h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #FFD700;
+        }
+
+        .details p {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .icons {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .icons a {
+            font-size: 1.5rem;
+            color: #FFF;
+            text-decoration: none;
+            transition: transform 0.3s ease;
+        }
+
+        .icons a:hover {
+            transform: scale(1.1);
+        }
+
+        .skills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .skills img {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+            transition: transform 0.3s ease;
+        }
+
+        .skills img:hover {
+            transform: scale(1.2);
+        }
+
+        .profile-photo {
+            flex: 1;
+            text-align: center;
+        }
+
+        .profile-photo img {
+            border-radius: 50%;
+            max-width: 300px;
+            width: 80%;
+            border: 5px solid #FFD700;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .drawer {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+        }
+
+        .drawer input[type="checkbox"] {
+            display: none;
+        }
+
+        .drawer label {
+            font-size: 2rem;
+            cursor: pointer;
+            color: #FFF;
+        }
+
+        .drawer-menu {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 200px;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            transform: translateX(100%);
+            transition: transform 0.5s ease;
+            padding: 20px;
+            box-shadow: -10px 0 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .drawer input[type="checkbox"]:checked ~ .drawer-menu {
+            transform: translateX(0);
+        }
+
+        .drawer-menu ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .drawer-menu li {
+            margin: 20px 0;
+        }
+
+        .drawer-menu li a {
+            color: #FFD700;
+            font-size: 1.5rem;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .drawer-menu li a:hover {
+            color: #FFF;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .details,
+        .profile-photo {
+            animation: fadeInUp 1s ease forwards;
+        }
+
+        .drawer-menu {
+            animation: fadeInUp 1s ease forwards;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="drawer">
+        <input type="checkbox" id="drawer-toggle">
+        <label for="drawer-toggle">&#9776;</label>
+        <div class="drawer-menu">
+            <ul>
+                <li><a href="#">Home</a></li>
+                <li><a href="projects.html">Projects</a></li>
+                <li><a href="#">Feedback</a></li>
+                <li><a href="#">Get the Solar System Code</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="details">
+            <h1>Sanjeev Ranjan</h1>
+            <p>Exploring and Diving</p>
+            <div class="icons">
+                <a href="https://www.linkedin.com/in/snjv7781" target="_blank">
+                    <img src="https://img.icons8.com/fluent/48/000000/linkedin.png" alt="LinkedIn">
+                </a>
+                <a href="https://github.com/Snjv7781" target="_blank">
+                    <img src="https://img.icons8.com/fluent/48/000000/github.png" alt="GitHub">
+                </a>
+                <a href="https://wa.me/7627095917?text=Hello%20there!" target="_blank">
+                    <img src="https://img.icons8.com/fluent/48/000000/whatsapp.png" alt="WhatsApp">
+                </a>
+                <a href="mailto:ranjansanjeev07@gmail.com">
+                    <img src="https://img.icons8.com/fluent/48/000000/gmail.png" alt="Mail">
+                </a>
+                
+                <a href="tel:+917627095917">
+                    <img src="https://img.icons8.com/fluent/48/000000/phone.png" alt="Contact">
+                </a>
+            </div>
+            <div class="skills">
+                <img src="https://img.icons8.com/color/48/000000/html-5.png" alt="HTML5">
+                <img src="https://img.icons8.com/color/48/000000/css3.png" alt="CSS3">
+                <img src="static\images\icons8-rhel-48.png" alt="redhat enterprise linux">
+                <img src="https://img.icons8.com/color/48/000000/python.png" alt="Python">
+                <img src="https://img.icons8.com/color/48/000000/docker.png" alt="Docker">
+                <img src="static\images\icons8-aws-48.png" alt="AWS">
+                <img src="static\images\icons8-flask-50.png" alt="flask">
+            </div>
+        </div>
+        <div class="profile-photo">
+            <img src="static\images\1000210356-01.jpeg" alt="Profile Image">
+        </div>
+    </div>
+
+    <!-- <script src="index.js"></script> -->
+</body>
+</html>
